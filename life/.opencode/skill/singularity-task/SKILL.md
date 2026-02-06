@@ -1,203 +1,203 @@
 ---
 name: singularity-task
-description: Manage tasks, projects, habits, and notebooks using the Singularity MCP tools. Use this skill when working with task management, creating or updating projects, managing habits, creating notebooks, or any operations involving tasks, to-do items, reminders, and project organization. Trigger when user mentions tasks, projects, habits, notebooks, to-do lists, reminders, or scheduling activities.
+description: Управляйте задачами, проектами, привычками и заметками, используя инструменты Singularity MCP. Используйте этот навык при работе с управлением задачами, создании или обновлении проектов, отслеживании привычек, создании записных книжек или любых операциях, связанных с задачами, пунктами дел, напоминаниями и организацией проектов. Активируйте, когда пользователь упоминает задачи, проекты, привычки, записные книжки, списки дел, напоминания или действия по планированию.
 ---
 
-# Singularity Task Management
+# Управление задачами Singularity
 
-## Overview
+## Обзор
 
-This skill enables task management, project organization, habit tracking, and notebook creation using Singularity MCP tools. It provides comprehensive guidelines for working with time zones, projects, tasks, notebooks, and habits.
+Этот навык обеспечивает управление задачами, организацию проектов, отслеживание привычек и создание записных книжек с помощью инструментов Singularity MCP. Он предоставляет всеобъемлющие рекомендации по работе с часовыми поясами, проектами, задачами, записными книжками и привычками.
 
-## User's Projects
+## Проекты пользователя
 
-When user asks to add tasks or mentions activities, consult `references/user_projects.md` to determine the appropriate project. This reference contains the user's personal project list with descriptions and usage guidelines.
+Когда пользователь просит добавить задачи или упоминает какую-либо деятельность, обратитесь к файлу `references/user_projects.md`, чтобы определить соответствующий проект. Этот справочник содержит личный список проектов пользователя с описаниями и рекомендациями по использованию.
 
-## Time Zone Configuration
+## Конфигурация часового пояса
 
-**CRITICAL:** All dates and times use GMT+3 timezone unless user specifies otherwise.
+**КРИТИЧНО ВАЖНО:** Все даты и время указаны в часовом поясе GMT+3, если пользователь не указал иное.
 
-- Default timezone: GMT+3
-- When time is specified in conversation, interpret it as GMT+3
-- Replace GMT+3 with user's actual timezone if needed
+- Часовой пояс по умолчанию: GMT+3
+- Когда в разговоре указано время, интерпретируйте его как GMT+3
+- Замените GMT+3 на фактический часовой пояс пользователя, если это необходимо
 
-## Working with Projects
+## Работа с проектами
 
-### Creating Projects
+### Создание проектов
 
-When creating projects, follow these requirements:
+При создании проектов следуйте этим требованиям:
 
-**Project Emoji Format:**
-- Must be hexadecimal Unicode code **without prefix**
-- Format: `"1f49e"` (hexadecimal string only)
-- NOT Unicode format: `"U+1F49E"`
-- NOT the emoji itself: `"💞"`
+**Формат эмодзи для проекта:**
+- Должен быть шестнадцатеричным кодом Unicode **без префикса**
+- Формат: `"1f49e"` (только шестнадцатеричная строка)
+- НЕ формат Unicode: `"U+1F49E"`
+- НЕ сам эмодзи: `"💞"`
 
-Examples:
+Примеры:
 - 💞 = `"1f49e"`
 - 🎯 = `"1f3af"`
 - 🚀 = `"1f680"`
 - ⭐️ = `"2b50"`
 
-### Adding Tasks to Projects
+### Добавление задач в проекты
 
-**Default behavior:** Always place new tasks in the project's base task group unless explicitly specified otherwise.
+**Поведение по умолчанию:** Всегда помещайте новые задачи в базовую группу задач (base task group) проекта, если иное не указано явно.
 
-### Project Settings
+### Настройки проекта
 
-**`showInBasket` field:** Do not set this field unless specifically requested by user.
+**Поле `showInBasket`:** Не устанавливайте это поле, если пользователь специально не попросил об этом.
 
-### Project Notes
+### Заметки к проекту
 
-**Note content format:** Must be in Delta format
-- Pass operations array directly: `[{},...]`
-- NOT wrapped format: `{"ops":[{},...]}`
-- **Critical:** Last insert in Delta must always end with line break
+**Формат содержимого заметки:** Должен быть в формате Delta
+- Передавайте массив операций напрямую: `[{},...]`
+- НЕ упакованный формат: `{"ops":[{},...]}`
+- **Важно:** Последняя вставка (insert) в Delta всегда должна заканчиваться переносом строки
 
-Example:
+Пример:
 ```json
 [
-  {"insert": "First line\n"},
-  {"insert": "Second line\n"}
+  {"insert": "Первая строка\n"},
+  {"insert": "Вторая строка\n"}
 ]
 ```
 
-## Working with Tasks
+## Работа с задачами
 
-### Date and Time Handling
+### Обработка даты и времени
 
-**Timezone:** Use GMT+3 for all task dates and times.
+**Часовой пояс:** Используйте GMT+3 для всех дат и времени задач.
 
-**Time precision:**
-- `useTime: false` - Start time is date-only (no specific hour)
-- `useTime: true` - Start time includes specific time in GMT+3
+**Точность времени:**
+- `useTime: false` — Время начала — только дата (без конкретного часа)
+- `useTime: true` — Время начала включает конкретное время по GMT+3
 
-### Notifications
+### Уведомления
 
-**Format:**
+**Формат:**
 ```json
 {
-  "notifies": [60, 15],      // Array in minutes, highest to lowest
-  "notify": 1,               // Main notification enabled
-  "alarmNotify": true        // Alarm (false by default)
+  "notifies": [60, 15],      // Массив в минутах, от большего к меньшему
+  "notify": 1,               // Основное уведомление включено
+  "alarmNotify": true        // Будильник (по умолчанию false)
 }
 ```
 
-**Rules:**
-- `notifies` array: Minutes before event, ordered highest to lowest
-- Example: `[60, 15]` = notifications at 1 hour and 15 minutes before
-- `notify: 1` enables main notification
-- `alarmNotify: true` only when explicitly requested (default: false)
+**Правила:**
+- Массив `notifies`: Минуты до события, упорядоченные от большего к меньшему
+- Пример: `[60, 15]` = уведомления за 1 час и за 15 минут до
+- `notify: 1` включает основное уведомление
+- `alarmNotify: true` только при явном запросе (по умолчанию: false)
 
-### Task Priority
+### Приоритет задачи
 
-**Default priority:** `1`
+**Приоритет по умолчанию:** `1`
 
-### Date Interpretation
+### Интерпретация дат
 
-**Technical fields:**
-- `modifiedDate` - Last change timestamp (NOT completion time)
-- `createdDate` - Original creation timestamp
-- Large difference between `modifiedDate` and `createdDate` indicates task was rescheduled
+**Технические поля:**
+- `modifiedDate` — Временная метка последнего изменения (НЕ время завершения)
+- `createdDate` — Исходная временная метка создания
+- Большая разница между `modifiedDate` и `createdDate` указывает на то, что задача была перенесена
 
-## Notebooks and Note-like Entries
+## Записные книжки и заметкоподобные записи
 
-### Creating Notebooks
+### Создание записных книжек
 
-**When user asks for notebook:** Create project with `notebook` attribute set to true.
+**Когда пользователь просит записную книжку:** Создайте проект с атрибутом `notebook`, установленным в `true`.
 
-### Adding Items to Notebooks
+### Добавление элементов в записные книжки
 
-**Default behavior:** Create task with `isNote` attribute when adding items to notebook.
+**Поведение по умолчанию:** Создавайте задачу с атрибутом `isNote` при добавлении элементов в записную книжку.
 
-### Tasks vs Notes
+### Задачи против Заметок
 
-**Decision tree:**
-1. User explicitly asks for task → Create task (without `isNote`)
-2. User adds item to notebook → Create task with `isNote` attribute
-3. User wants note in non-notebook project → Create task with `isNote` attribute
+**Дерево решений:**
+1. Пользователь явно просит задачу → Создать задачу (без `isNote`)
+2. Пользователь добавляет элемент в записную книжку → Создать задачу с атрибутом `isNote`
+3. Пользователь хочет заметку в проекте, не являющемся записной книжкой → Создать задачу с атрибутом `isNote`
 
-## Working with Habits
+## Работа с привычками
 
-### Habit Colors
+### Цвета привычек
 
-**Format:** Pass color as string from acceptable values, NOT color code.
+**Формат:** Передавайте цвет в виде строки из списка допустимых значений, а НЕ цветовой код.
 
-**Acceptable values:**
-- `"red"`
-- `"pink"`
-- `"purple"`
-- `"deepPurple"`
-- `"indigo"`
-- `"lightBlue"`
-- `"cyan"`
-- `"teal"`
-- `"green"`
-- `"lightGreen"`
-- `"lime"`
-- `"yellow"`
-- `"amber"`
-- `"orange"`
-- `"deepOrange"`
-- `"brown"`
-- `"grey"`
-- `"blueGrey"`
+**Допустимые значения:**
+- `"red"` (красный)
+- `"pink"` (розовый)
+- `"purple"` (фиолетовый)
+- `"deepPurple"` (темно-фиолетовый)
+- `"indigo"` (индиго)
+- `"lightBlue"` (голубой)
+- `"cyan"` (циан)
+- `"teal"` (бирюзовый)
+- `"green"` (зеленый)
+- `"lightGreen"` (светло-зеленый)
+- `"lime"` (лаймовый)
+- `"yellow"` (желтый)
+- `"amber"` (янтарный)
+- `"orange"` (оранжевый)
+- `"deepOrange"` (темно-оранжевый)
+- `"brown"` (коричневый)
+- `"grey"` (серый)
+- `"blueGrey"` (серо-голубой)
 
-### Habit Status
+### Статус привычки
 
-**Active habits:** Status `0`
+**Активные привычки:** Статус `0`
 
-**Always create habits with:** `status: 0`
+**Всегда создавайте привычки со статусом:** `status: 0`
 
-## Common Workflows
+## Типичные рабочие процессы
 
-### Example: Creating a Project with Tasks
-
-```
-User: "Create a project called 'Website Redesign' with tasks for design, development, and testing"
-
-Steps:
-1. Create project with name "Website Redesign"
-2. Set appropriate emoji (e.g., "1f4bb" for 💻)
-3. Add tasks to base task group:
-   - Design task
-   - Development task
-   - Testing task
-4. Set priority 1 for all tasks (default)
-5. Use GMT+3 for any date/time specifications
-```
-
-### Example: Creating a Notebook
+### Пример: Создание проекта с задачами
 
 ```
-User: "Create a research notebook for my AI project"
+Пользователь: "Создай проект 'Редизайн сайта' с задачами на дизайн, разработку и тестирование"
 
-Steps:
-1. Create project with name "AI Research"
-2. Set notebook: true
-3. Set appropriate emoji (e.g., "1f4d3" for 📓)
-4. When adding entries, create tasks with isNote: true
+Шаги:
+1. Создать проект с именем "Редизайн сайта"
+2. Установить подходящий эмодзи (например, "1f4bb" для 💻)
+3. Добавить задачи в базовую группу задач:
+   - Задача на дизайн
+   - Задача на разработку
+   - Задача на тестирование
+4. Установить приоритет 1 для всех задач (по умолчанию)
+5. Использовать GMT+3 для любых указаний даты/времени
 ```
 
-### Example: Creating a Habit
+### Пример: Создание записной книжки
 
 ```
-User: "Create a daily reading habit"
+Пользователь: "Создай исследовательскую записную книжку для моего ИИ-проекта"
 
-Steps:
-1. Create habit with appropriate name
-2. Set color from acceptable list (e.g., "blue")
-3. Set status: 0 (active)
+Шаги:
+1. Создать проект с именем "AI Research" (или "Исследования ИИ")
+2. Установить notebook: true
+3. Установить подходящий эмодзи (например, "1f4d3" для 📓)
+4. При добавлении записей создавать задачи с isNote: true
 ```
 
-## Resources
+### Пример: Создание привычки
+
+```
+Пользователь: "Создай ежедневную привычку чтения"
+
+Шаги:
+1. Создать привычку с подходящим именем
+2. Установить цвет из допустимого списка (например, "blue")
+3. Установить status: 0 (активная)
+```
+
+## Ресурсы
 
 ### references/user_projects.md
 
-Contains the user's personal project list with descriptions and context triggers. Read this file when:
-- User asks to add a task without specifying which project
-- User mentions an activity that should be categorized
-- You need to determine the appropriate project for a task
-- User says "add work task" or mentions work-related activities
+Содержит личный список проектов пользователя с описаниями и триггерами контекста. Читайте этот файл, когда:
+- Пользователь просит добавить задачу, не указывая, в какой проект
+- Пользователь упоминает деятельность, которую нужно классифицировать
+- Вам нужно определить подходящий проект для задачи
+- Пользователь говорит "добавь рабочую задачу" или упоминает деятельность, связанную с работой
 
-The file provides project names, purposes, and guidelines for when to use each project.
+Файл предоставляет названия проектов, их назначение и рекомендации по использованию каждого из них.
