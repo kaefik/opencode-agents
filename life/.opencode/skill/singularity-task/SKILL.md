@@ -9,6 +9,10 @@ description: Manage tasks, projects, habits, and notebooks using the Singularity
 
 This skill enables task management, project organization, habit tracking, and notebook creation using Singularity MCP tools. It provides comprehensive guidelines for working with time zones, projects, tasks, notebooks, and habits.
 
+## User's Projects
+
+When user asks to add tasks or mentions activities, consult `references/user_projects.md` to determine the appropriate project. This reference contains the user's personal project list with descriptions and usage guidelines.
+
 ## Time Zone Configuration
 
 **CRITICAL:** All dates and times use GMT+3 timezone unless user specifies otherwise.
@@ -185,3 +189,15 @@ Steps:
 2. Set color from acceptable list (e.g., "blue")
 3. Set status: 0 (active)
 ```
+
+## Resources
+
+### references/user_projects.md
+
+Contains the user's personal project list with descriptions and context triggers. Read this file when:
+- User asks to add a task without specifying which project
+- User mentions an activity that should be categorized
+- You need to determine the appropriate project for a task
+- User says "add work task" or mentions work-related activities
+
+The file provides project names, purposes, and guidelines for when to use each project.
