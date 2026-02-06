@@ -1,0 +1,19 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "singularity": {
+      "type": "local",
+      "command": [
+        "node",
+        ".opencode/mcp/singularity-mcp-server/mcp.js",
+        "--baseUrl",
+        "https://api.singularity-app.com",
+        "--accessToken",
+        "{env:SINGULARITY_API_TOKEN}",
+        "-n"
+      ],
+      "enabled": true,
+      "timeout": 10000
+    }
+  }
+}
