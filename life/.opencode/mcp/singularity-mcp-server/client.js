@@ -149,9 +149,6 @@ class ApiClient {
             },
         };
     }
-    cleanParams(params) {
-        return Object.fromEntries(Object.entries(params).filter(([_, v]) => v !== undefined && v !== null && v !== ""));
-    }
     // Project methods
     /**
      * Lists projects
@@ -160,11 +157,11 @@ class ApiClient {
      */
     async listProjects(params = {}) {
         const response = await this.client.get('/v2/project', this.createRequestConfig({
-            params: this.cleanParams({
+            params: {
                 includeRemoved: params.includeRemoved,
                 includeArchived: params.includeArchived,
                 maxCount: params.maxCount,
-            }),
+            },
         }));
         return response.data;
     }
@@ -209,7 +206,7 @@ class ApiClient {
      * @returns List of task groups
      */
     async listTaskGroups(params) {
-        const response = await this.client.get('/v2/task-group', this.createRequestConfig({ params: this.cleanParams(params ?? {}) }));
+        const response = await this.client.get('/v2/task-group', this.createRequestConfig({ params }));
         return response.data;
     }
     /**
@@ -254,7 +251,7 @@ class ApiClient {
      */
     async listTasks(params = {}) {
         const response = await this.client.get('/v2/task', this.createRequestConfig({
-            params: this.cleanParams({
+            params: {
                 includeRemoved: params.includeRemoved,
                 includeArchived: params.includeArchived,
                 maxCount: params.maxCount,
@@ -263,7 +260,7 @@ class ApiClient {
                 includeAllRecurrenceInstances: params.includeAllRecurrenceInstances,
                 startDateFrom: params.startDateFrom,
                 startDateTo: params.startDateTo,
-            }),
+            },
         }));
         return response.data;
     }
@@ -308,7 +305,7 @@ class ApiClient {
      * @returns List of notes
      */
     async listNotes(params) {
-        const response = await this.client.get('/v2/note', this.createRequestConfig({ params: this.cleanParams(params ?? {}) }));
+        const response = await this.client.get('/v2/note', this.createRequestConfig({ params }));
         return response.data;
     }
     /**
@@ -352,7 +349,7 @@ class ApiClient {
      * @returns List of kanban statuses
      */
     async listKanbanStatuses(params) {
-        const response = await this.client.get('/v2/kanban-status', this.createRequestConfig({ params: this.cleanParams(params ?? {}) }));
+        const response = await this.client.get('/v2/kanban-status', this.createRequestConfig({ params }));
         return response.data;
     }
     /**
@@ -396,7 +393,7 @@ class ApiClient {
      * @returns List of kanban task statuses
      */
     async listKanbanTaskStatuses(params) {
-        const response = await this.client.get('/v2/kanban-task-status', this.createRequestConfig({ params: this.cleanParams(params ?? {}) }));
+        const response = await this.client.get('/v2/kanban-task-status', this.createRequestConfig({ params }));
         return response.data;
     }
     /**
@@ -436,9 +433,9 @@ class ApiClient {
     // --- HABIT ---
     async listHabits(params = {}) {
         const response = await this.client.get('/v2/habit', this.createRequestConfig({
-            params: this.cleanParams({
+            params: {
                 maxCount: params.maxCount,
-            }),
+            },
         }));
         return response.data;
     }
@@ -460,12 +457,12 @@ class ApiClient {
     // --- HABIT DAILY PROGRESS ---
     async listHabitDailyProgress(params = {}) {
         const response = await this.client.get('/v2/habit-progress', this.createRequestConfig({
-            params: this.cleanParams({
+            params: {
                 maxCount: params.maxCount,
                 habit: params.habit,
                 startDate: params.startDate,
                 endDate: params.endDate,
-            }),
+            },
         }));
         return response.data;
     }
@@ -487,11 +484,11 @@ class ApiClient {
     // --- CHECKLIST ITEM ---
     async listChecklistItems(params = {}) {
         const response = await this.client.get('/v2/checklist-item', this.createRequestConfig({
-            params: this.cleanParams({
+            params: {
                 includeRemoved: params.includeRemoved,
                 maxCount: params.maxCount,
                 parent: params.parent,
-            }),
+            },
         }));
         return response.data;
     }
@@ -513,49 +510,11 @@ class ApiClient {
     // --- TAG ---
     async listTags(params = {}) {
         const response = await this.client.get('/v2/tag', this.createRequestConfig({
-            params: this.cleanParams({
+            params: {
                 includeRemoved: params.includeRemoved,
                 maxCount: params.maxCount,
                 parent: params.parent,
-            }),
-        }));
-        return response.data;
-    }
-    // TIME STAT METHODS
-    async createTimeStat(timeStat) {
-        const response = await this.client.post('/v2/time-stat', timeStat, this.createRequestConfig());
-        return response.data;
-    }
-    async updateTimeStat(timeStat) {
-        const { id, ...updateData } = timeStat;
-        const response = await this.client.patch(`/v2/time-stat/${id}`, updateData, this.createRequestConfig());
-        return response.data;
-    }
-    async deleteTimeStat(id) {
-        await this.client.delete(`/v2/time-stat/${id}`, this.createRequestConfig());
-    }
-    async getTimeStat(id) {
-        const response = await this.client.get(`/v2/time-stat/${id}`, this.createRequestConfig());
-        return response.data;
-    }
-    async listTimeStats(params = {}) {
-        const response = await this.client.get('/v2/time-stat', this.createRequestConfig({
-            params: this.cleanParams({
-                dateFrom: params.dateFrom,
-                dateTo: params.dateTo,
-                relatedTaskId: params.relatedTaskId,
-                maxCount: params.maxCount,
-            }),
-        }));
-        return response.data;
-    }
-    async deleteBulkTimeStats(params) {
-        const response = await this.client.delete('/v2/time-stat', this.createRequestConfig({
-            params: this.cleanParams({
-                dateFrom: params.dateFrom,
-                dateTo: params.dateTo,
-                relatedTaskId: params.relatedTaskId,
-            }),
+            },
         }));
         return response.data;
     }

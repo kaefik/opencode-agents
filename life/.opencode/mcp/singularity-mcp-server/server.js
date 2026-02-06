@@ -16,7 +16,6 @@ const habit_1 = require("./modules/habit");
 const habit_progress_1 = require("./modules/habit-progress");
 const checklist_item_1 = require("./modules/checklist-item");
 const tag_1 = require("./modules/tag");
-const time_stat_1 = require("./modules/time-stat");
 class SingularityMcpServer {
     /**
      * Creates a new Singularity MCP server
@@ -104,8 +103,6 @@ class SingularityMcpServer {
         (0, checklist_item_1.registerChecklistItemResources)(this.server, this.apiClient);
         this.logMessage('Ресурсы', 'Начало регистрации ресурсов тегов');
         (0, tag_1.registerTagResources)(this.server, this.apiClient);
-        this.logMessage('Ресурсы', 'Начало регистрации ресурсов статистики времени');
-        (0, time_stat_1.registerTimeStatResources)(this.server, this.apiClient);
         this.logMessage('Ресурсы', 'Все ресурсы зарегистрированы');
     }
     /**
@@ -132,8 +129,6 @@ class SingularityMcpServer {
         (0, checklist_item_1.registerChecklistItemTools)(this.server, this.apiClient);
         this.logMessage('Инструменты', 'Начало регистрации инструментов тегов');
         (0, tag_1.registerTagTools)(this.server, this.apiClient);
-        this.logMessage('Инструменты', 'Начало регистрации инструментов статистики времени');
-        (0, time_stat_1.registerTimeStatTools)(this.server, this.apiClient);
         this.logMessage('Инструменты', 'Все инструменты зарегистрированы');
     }
     /**
