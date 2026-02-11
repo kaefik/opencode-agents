@@ -28,12 +28,14 @@ def build_maps(data: Dict[str, Any]) -> tuple:
 
 
 def format_date(date_str: Optional[str]) -> str:
-    """Format ISO date string to readable format."""
+    """Format ISO date string to readable format (local timezone)."""
     if not date_str or date_str == 'N/A':
         return 'N/A'
     try:
         dt = datetime.fromisoformat(date_str.replace('Z', '+00:00'))
-        return dt.strftime('%Y-%m-%d %H:%M')
+        # Convert to local timezone
+        dt_local = dt.astimezone()
+        return dt_local.strftime('%Y-%m-%d %H:%M')
     except:
         return date_str
 
@@ -129,6 +131,16 @@ def extract_tasks(tasks: List[Dict[str, Any]],
                 'paused': recurrence.get('paused', False),
             }
         
+        # Extract local dates for filtering
+        def get_local_date(iso_date: Optional[str]) -> str:
+            if not iso_date:
+                return ''
+            try:
+                dt = datetime.fromisoformat(iso_date.replace('Z', '+00:00'))
+                return dt.astimezone().date().isoformat()
+            except:
+                return ''
+        
         task = {
             'id': t['id'],
             'title': t.get('title', ''),
@@ -140,12 +152,16 @@ def extract_tasks(tasks: List[Dict[str, Any]],
             'parent_title': parent.get('title', '') if parent else '',
             'parent_order': t.get('parentOrder', ''),
             'start': format_date(t.get('start', '')) if t.get('start') else '',
+            'start_date_local': get_local_date(t.get('start')),
             'deadline': format_date(t.get('deadline', '')) if t.get('deadline') else '',
+            'deadline_date_local': get_local_date(t.get('deadline')),
             'created_date': format_date(t.get('createdDate', '')) if t.get('createdDate') else '',
+            'created_date_local': get_local_date(t.get('createdDate')),
             'journal_date': format_date(t.get('journalDate', '')) if t.get('journalDate') else '',
+            'journal_date_local': get_local_date(t.get('journalDate')),
             'time_length': t.get('timeLength', ''),
             'priority': t.get('priority', ''),
-            'priority_text': {0: 'Низкий', 1: 'Высокий', 2: 'Срочный'}.get(t.get('priority'), ''),
+            'priority_text': {0: 'Низкий', 1: 'Высокий', 2: 'Срочный'}.get(t.get('priority', 0), ''),
             'complete': t.get('complete', 0),
             'state': t.get('state', ''),
             'checked': t.get('checked', False),
@@ -238,6 +254,90 @@ def filter_tasks_by_status(tasks: List[Dict[str, Any]], status_filter: str, incl
         filtered = [t for t in filtered if not t.get('show_in_basket', False)]
     
     return filtered
+
+
+def filter_tasks_by_date(tasks: List[Dict[str, Any]], date_filter: str) -> List[Dict[str, Any]]:
+    """Filter tasks by date.
+    
+    Args:
+        tasks: List of tasks (with local_date_* fields)
+        date_filter: Date in format 'YYYY-MM-DD' or 'today' for current date
+    
+    Returns:
+        Filtered list of tasks
+    """
+    if not date_filter:
+        return tasks
+    
+    # Parse target date
+    if date_filter.lower() == 'today':
+        target_date = datetime.now().date().isoformat()
+    else:
+        try:
+            target_date = datetime.strptime(date_filter, '%Y-%m-%d').date().isoformat()
+        except ValueError:
+            print(f"Неверный формат даты: {date_filter}. Используйте YYYY-MM-DD или 'today'")
+            return tasks
+    
+    filtered = []
+    for t in tasks:
+        # Check start date (local)
+        if t.get('start_date_local') == target_date:
+            filtered.append(t)
+            continue
+        
+        # Check deadline date (local)
+        if t.get('deadline_date_local') == target_date:
+            filtered.append(t)
+            continue
+        
+        # Check journal date (local)
+        if t.get('journal_date_local') == target_date:
+            filtered.append(t)
+            continue
+        
+        # Check created date (local)
+        if t.get('created_date_local') == target_date:
+            filtered.append(t)
+            continue
+    
+    return filtered
+
+
+def print_tasks_detailed(tasks: List[Dict[str, Any]]):
+    """Print tasks with full details."""
+    print("## Задачи (подробно)\n")
+    
+    for t in sorted(tasks, key=lambda x: (x['start'] or x['deadline'] or x['created_date'] or '')):
+        print(f"### {t['title']}")
+        print(f"**ID**: {t['id']}")
+        if t['project_title']:
+            print(f"**Проект**: {t['project_title']}")
+        if t['group_title']:
+            print(f"**Группа**: {t['group_title']}")
+        if t['parent_title']:
+            print(f"**Родительская задача**: {t['parent_title']}")
+        if t['start']:
+            print(f"**Начало**: {t['start']}")
+        if t['deadline']:
+            print(f"**Дедлайн**: {t['deadline']}")
+        if t['created_date']:
+            print(f"**Создана**: {t['created_date']}")
+        if t['journal_date']:
+            print(f"**Журнал**: {t['journal_date']}")
+        if t['priority_text']:
+            print(f"**Приоритет**: {t['priority_text']}")
+        if t['complete']:
+            print(f"**Выполнено**: {t['complete']}%")
+        if t['checked']:
+            print(f"**Отмечено как выполненное**: Да")
+        if t['deferred']:
+            print(f"**Отложено**: Да")
+        if t['note']:
+            print(f"\n**Заметка**:\n{t['note']}")
+        if t['tags']:
+            print(f"\n**Теги**: {', '.join(t['tags'])}")
+        print()
 
 
 def print_tasks_by_project(tasks: List[Dict[str, Any]]):
@@ -403,6 +503,9 @@ def main():
   python3 extract_singularity_data.py --status incomplete      # Только не выполненные
   python3 extract_singularity_data.py /path/to/backup.json      # Указать файл
   python3 extract_singularity_data.py --status incomplete backup.json
+  python3 extract_singularity_data.py --date today              # Задачи на сегодня
+  python3 extract_singularity_data.py --date 2026-02-11         # Задачи на конкретную дату
+  python3 extract_singularity_data.py --date today --detailed  # Подробно задачи на сегодня
         '''
     )
     parser.add_argument(
@@ -445,6 +548,16 @@ def main():
         default='extracted_data.md',
         help='Путь к выходному Markdown файлу'
     )
+    parser.add_argument(
+        '--date',
+        default=None,
+        help='Фильтр по дате: YYYY-MM-DD или "today" для текущего дня'
+    )
+    parser.add_argument(
+        '--detailed',
+        action='store_true',
+        help='Вывести задачи с полным описанием'
+    )
     
     args = parser.parse_args()
     
@@ -472,6 +585,11 @@ def main():
             tasks = [t for t in tasks if t.get('checked', 0) == 0]
     else:
         tasks = filter_tasks_by_status(all_tasks, args.status, args.include_basket)
+    
+    # Filter by date if specified
+    if args.date:
+        print(f"Фильтрация по дате: {args.date}...")
+        tasks = filter_tasks_by_date(tasks, args.date)
     
     print(f"\n✓ Проектов: {len(projects)}")
     print(f"✓ Задач (всего): {len(all_tasks)}")
@@ -511,9 +629,17 @@ def main():
         basket_info = ' [БЕЗ КОРЗИНЫ]'
     
     print("\n" + "="*80)
-    print(f"Фильтр: {filter_names.get(args.status, args.status)}{basket_info}\n")
+    print(f"Фильтр: {filter_names.get(args.status, args.status)}{basket_info}")
+    if args.date:
+        print(f"Дата: {args.date}")
+    print()
+    
     print_projects_table(projects)
     print_tasks_summary(tasks)
+    
+    if args.detailed:
+        print_tasks_detailed(tasks)
+    
     print("="*80)
 
 
