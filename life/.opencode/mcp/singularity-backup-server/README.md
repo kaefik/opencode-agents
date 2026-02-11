@@ -22,6 +22,8 @@
 | `status` | string | Фильтр по статусу выполнения (`all`, `complete`, `incomplete`) | `all` |
 | `include_basket` | boolean | Включать задачи из корзины | `true` |
 | `basket_only` | boolean | Только задачи из корзины | `false` |
+| `date` | string | Фильтр по дате: `YYYY-MM-DD` или `today` | не указано |
+| `detailed` | boolean | Выводить задачи с полным описанием | `false` |
 | `json_output` | string | Путь к выходному JSON файлу | `extracted_data.json` |
 | `md_output` | string | Путь к выходному Markdown файлу | `extracted_data.md` |
 
@@ -65,6 +67,31 @@
 #### Сохраниение в другие файлы
 ```
 /extract_singularity_data --json_output my_tasks.json --md_output my_tasks.md
+```
+
+#### Задачи на сегодня
+```
+/extract_singularity_data --date today
+```
+
+#### Подробный список задач на сегодня
+```
+/extract_singularity_data --date today --detailed
+```
+
+#### Задачи на конкретную дату
+```
+/extract_singularity_data --date 2026-02-11
+```
+
+#### Невыполненные задачи на сегодня
+```
+/extract_singularity_data --date today --status incomplete --include_basket false
+```
+
+#### Выполненные задачи на сегодня с деталями
+```
+/extract_singularity_data --date today --status complete --detailed
 ```
 
 ## Статусы задач в Singularity
@@ -117,6 +144,20 @@
 /extract_singularity_data --status incomplete --include_basket false
 ```
 
+### Посмотреть задачи на сегодня
+```
+# Краткий список
+/extract_singularity_data --date today
+
+# С полным описанием
+/extract_singularity_data --date today --detailed
+```
+
+### Посмотреть задачи на конкретную дату
+```
+/extract_singularity_data --date 2026-02-11
+```
+
 ### Посмотреть историю выполненных задач
 ```
 /extract_singularity_data --status complete --include_basket false
@@ -136,3 +177,13 @@
 # Все задачи включая корзину
 /extract_singularity_data
 ```
+
+## Работа с часовыми поясами
+
+Даты в бэкапе Singularity хранятся в формате UTC. Скрипт автоматически конвертирует их в локальный часовой пояс:
+
+- **2026-02-10T21:00:00.000Z** (UTC) → **2026-02-11 00:00** (UTC+3, Казань)
+
+Это важно при использовании параметра `--date` - задача с датой начала `2026-02-10T21:00:00.000Z` будет отображаться как запланированная на **2026-02-11**.
+
+Поля `*_date_local` в JSON файле содержат даты в локальном часовом поясе и используются для фильтрации по `--date`.

@@ -35,16 +35,27 @@ extract_singularity_data(basket_only=true)
 
 # Извлечение из другого файла
 extract_singularity_data(backup_file='/path/to/backup.json')
+
+# Задачи на сегодня
+extract_singularity_data(date='today')
+
+# Подробный список задач на сегодня
+extract_singularity_data(date='today', detailed=True)
+
+# Задачи на конкретную дату
+extract_singularity_data(date='2026-02-11')
+
+# Невыполненные задачи на сегодня
+extract_singularity_data(date='today', status='incomplete', include_basket=False)
 ```
 
-### Параметры
+## Работа с часовыми поясами
 
-- `backup_file` - путь к файлу бэкапа (по умолчанию: `data/singularity_backup_2026-02-11.json`)
-- `status` - фильтр статуса: `all`, `complete`, `incomplete`
-- `include_basket` - включать задачи из корзины (по умолчанию: `true`)
-- `basket_only` - только задачи из корзины (по умолчанию: `false`)
-- `json_output` - путь к JSON файлу (по умолчанию: `extracted_data.json`)
-- `md_output` - путь к Markdown файлу (по умолчанию: `extracted_data.md`)
+Даты в бэкапе Singularity хранятся в формате UTC. Скрипт автоматически конвертирует их в локальный часовой пояс:
+
+- **2026-02-10T21:00:00.000Z** (UTC) → **2026-02-11 00:00** (UTC+3, Казань)
+
+Это важно при использовании параметра `date` - задача с датой начала `2026-02-10T21:00:00.000Z` будет отображаться как запланированная на **2026-02-11**.
 
 ## Выходные файлы
 
