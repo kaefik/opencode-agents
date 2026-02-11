@@ -2,7 +2,13 @@
 
 ## Обзор
 
-Скрипт `extract_singularity_data.py` извлекает данные из бэкапа Singularity и сохраняет их в JSON и Markdown форматы.
+Скрипт `extract_singularity_data.py` извлекает данные из бэкапа Singularity и сохраняет их в JSON и Markdown форматы. Поддерживает:
+
+- Фильтрацию по статусу выполнения (выполненные/невыполненные)
+- Фильтрацию по дате (включая "задачи на сегодня")
+- Исключение или включение задач из корзины
+- Подробный вывод задач в консоль
+- Автоматическую конвертацию дат из UTC в локальный часовой пояс
 
 ## Статусы задач в Singularity
 
@@ -109,6 +115,40 @@ python3 extract_singularity_data.py --json-output output.json
 python3 extract_singularity_data.py --md-output output.md
 ```
 
+#### `--date {YYYY-MM-DD | today}`
+
+Фильтрация задач по дате. Выводит задачи, у которых совпадает дата начала, дедлайна, журнала или создания.
+
+- **`YYYY-MM-DD`** - конкретная дата (например, `2026-02-11`)
+- **`today`** - задачи на текущий день
+
+Даты конвертируются из UTC в локальный часовой пояс автоматически.
+
+**Примеры:**
+```bash
+# Задачи на сегодня
+python3 extract_singularity_data.py --date today
+
+# Задачи на конкретную дату
+python3 extract_singularity_data.py --date 2026-02-11
+
+# Комбинация с другими фильтрами
+python3 extract_singularity_data.py --date today --status incomplete --no-include-basket
+```
+
+#### `--detailed`
+
+Вывод задач с полным описанием в консоль. Включает все поля задачи: заметки, теги, приоритеты, даты и т.д.
+
+**Пример:**
+```bash
+# Подробный список задач на сегодня
+python3 extract_singularity_data.py --date today --detailed
+
+# Подробный список невыполненных задач
+python3 extract_singularity_data.py --status incomplete --detailed
+```
+
 ## Примеры использования
 
 ### Все задачи (включая корзину)
@@ -173,6 +213,25 @@ python3 extract_singularity_data.py --no-include-basket --status incomplete \
   --json-output my_tasks.json --md-output my_tasks.md
 ```
 
+### Фильтрация по дате
+
+```bash
+# Задачи на сегодня
+python3 extract_singularity_data.py --date today
+
+# Подробный список задач на сегодня
+python3 extract_singularity_data.py --date today --detailed
+
+# Задачи на конкретную дату
+python3 extract_singularity_data.py --date 2026-02-11
+
+# Невыполненные задачи на сегодня
+python3 extract_singularity_data.py --date today --status incomplete --no-include-basket
+
+# Выполненные задачи на сегодня с деталями
+python3 extract_singularity_data.py --date today --status complete --detailed
+```
+
 ## Структура выходных файлов
 
 ### JSON файл
@@ -213,12 +272,20 @@ python3 extract_singularity_data.py --no-include-basket --status incomplete \
   "group_title": "Название группы",
   "parent_id": "T-xxx-xxx-xxx-xxx-xxxxxxxxxxxx",
   "parent_title": "Родительская задача",
+  "parent_order": 22900,
   "start": "2025-01-01 10:00",
+  "start_date_local": "2025-01-01",
   "deadline": "2025-01-31 18:00",
+  "deadline_date_local": "2025-01-31",
   "created_date": "2025-01-01 09:00",
+  "created_date_local": "2025-01-01",
+  "journal_date": "2025-01-01 09:00",
+  "journal_date_local": "2025-01-01",
   "time_length": 60,
   "priority": 1,
   "priority_text": "Высокий",
+  "complete": 0,
+  "state": 1,
   "checked": 0,
   "deferred": false,
   "use_time": true,
@@ -226,10 +293,26 @@ python3 extract_singularity_data.py --no-include-basket --status incomplete \
   "tags": ["тег1", "тег2"],
   "notifies": [60, 30],
   "alarm_notify": false,
+  "recurrence": {
+    "type": "daily",
+    "next_time": "2025-01-02 10:00",
+    "paused": false
+  },
+  "schedule_order": 45006,
+  "seen_today": "2025-01-01",
+  "is_note": false,
   "show_in_basket": false,
   "delete_date": ""
 }
 ```
+
+**Новые поля:**
+- `*_date_local` - даты в локальном часовом поясе (для фильтрации по `--date`)
+- `journal_date` - дата журнальной записи задачи
+- `recurrence` - информация о повторении задачи
+- `schedule_order` - порядок в расписании
+- `seen_today` - дата последнего просмотра задачи
+- `is_note` - является ли задача заметкой
 
 ## Частые сценарии
 
@@ -237,6 +320,22 @@ python3 extract_singularity_data.py --no-include-basket --status incomplete \
 
 ```bash
 python3 extract_singularity_data.py --no-include-basket --status incomplete
+```
+
+### Посмотреть задачи на сегодня
+
+```bash
+# Краткий список
+python3 extract_singularity_data.py --date today
+
+# С полным описанием
+python3 extract_singularity_data.py --date today --detailed
+```
+
+### Посмотреть задачи на конкретную дату
+
+```bash
+python3 extract_singularity_data.py --date 2026-02-11 --detailed
 ```
 
 ### Посмотреть историю выполненных задач
@@ -264,3 +363,13 @@ python3 extract_singularity_data.py
 # Или явно указав
 python3 extract_singularity_data.py --status all --include-basket
 ```
+
+## Работа с часовыми поясами
+
+Даты в бэкапе Singularity хранятся в формате UTC. Скрипт автоматически конвертирует их в локальный часовой пояс:
+
+- **2026-02-10T21:00:00.000Z** (UTC) → **2026-02-11 00:00** (UTC+3, Казань)
+
+Это важно при использовании фильтра `--date` - задача с датой начала `2026-02-10T21:00:00.000Z` будет отображаться как запланированная на **2026-02-11**.
+
+Поля `*_date_local` в JSON файле содержат даты в локальном часовом поясе и используются для фильтрации по `--date`.
