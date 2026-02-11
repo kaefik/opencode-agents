@@ -408,7 +408,7 @@ def main():
     parser.add_argument(
         'backup_file',
         nargs='?',
-        default='/home/oilnur/01-Projects/prj-opencode/opencode-agents/life/data/singularity_backup_2026-02-11.json',
+        default='data/singularity_backup_2026-02-11.json',
         help='Путь к файлу бэкапа Singularity (по умолчанию: data/singularity_backup_2026-02-11.json)'
     )
     parser.add_argument(
@@ -437,12 +437,12 @@ def main():
     )
     parser.add_argument(
         '--json-output',
-        default='/home/oilnur/01-Projects/prj-opencode/opencode-agents/life/extracted_data.json',
+        default='extracted_data.json',
         help='Путь к выходному JSON файлу'
     )
     parser.add_argument(
         '--md-output',
-        default='/home/oilnur/01-Projects/prj-opencode/opencode-agents/life/extracted_data.md',
+        default='extracted_data.md',
         help='Путь к выходному Markdown файлу'
     )
     

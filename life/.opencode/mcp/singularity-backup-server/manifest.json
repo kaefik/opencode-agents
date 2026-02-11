@@ -1,0 +1,23 @@
+{
+    "manifest_version": "0.3",
+    "name": "singularity-backup-server",
+    "version": "1.0.0",
+    "description": "Model Context Protocol Server for extracting data from Singularity backup files",
+    "author": {
+        "name": "singularity-backup"
+    },
+    "homepage": "https://singularity-app.com",
+    "icon": "logo.png",
+    "server": {
+        "type": "node",
+        "entry_point": "mcp.js",
+        "mcp_config": {
+            "command": "node",
+            "args": [
+                "${__dirname}/mcp.js"
+            ],
+            "env": {}
+        }
+    },
+    "license": "MIT"
+}
